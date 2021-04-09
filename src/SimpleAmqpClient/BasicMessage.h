@@ -54,7 +54,7 @@ namespace AmqpClient {
 class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
  public:
   /// A shared pointer to BasicMessage
-  typedef boost::shared_ptr<BasicMessage> ptr_t;
+  using ptr_t = std::shared_ptr<BasicMessage>;
 
   /// With durable queues, messages can be requested to persist or not
   enum delivery_mode_t {
@@ -66,7 +66,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Create a new empty BasicMessage object
    */
-  static ptr_t Create() { return boost::make_shared<BasicMessage>(); }
+  static ptr_t Create() { return std::make_shared<BasicMessage>(); }
 
   /**
    * Create a new BasicMessage object with given body
@@ -75,13 +75,13 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
    * @returns a new BasicMessage object
    */
   static ptr_t Create(const std::string& body) {
-    return boost::make_shared<BasicMessage>(body);
+    return std::make_shared<BasicMessage>(body);
   }
 
   /// Construct empty BasicMessage
   BasicMessage();
   /// Construct BasicMessage with given body
-  BasicMessage(const std::string& body);
+  explicit BasicMessage(const std::string& body);
 
  public:
   /**
@@ -92,7 +92,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the message body as a std::string
    */
-  const std::string& Body() const;
+  [[nodiscard]] const std::string& Body() const;
   std::string& Body();
 
   /**
@@ -103,7 +103,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the content type property
    */
-  const std::string& ContentType() const;
+  [[nodiscard]] const std::string& ContentType() const;
   /**
    * Sets the content type property
    */
@@ -111,7 +111,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Determines whether the content type property is set
    */
-  bool ContentTypeIsSet() const;
+  [[nodiscard]] bool ContentTypeIsSet() const;
   /**
    * Unsets the content type property if it is set
    */
@@ -120,7 +120,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the content encoding property
    */
-  const std::string& ContentEncoding() const;
+  [[nodiscard]] const std::string& ContentEncoding() const;
   /**
    * Sets the content encoding property
    */
@@ -128,7 +128,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Determines whether the content encoding property is set
    */
-  bool ContentEncodingIsSet() const;
+  [[nodiscard]] bool ContentEncodingIsSet() const;
   /**
    * Unsets the content encoding property if it is set
    */
@@ -137,7 +137,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the delivery mode property
    */
-  delivery_mode_t DeliveryMode() const;
+  [[nodiscard]] delivery_mode_t DeliveryMode() const;
   /**
    * Sets the delivery mode property
    */
@@ -154,7 +154,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the priority property
    */
-  boost::uint8_t Priority() const;
+  [[nodiscard]] boost::uint8_t Priority() const;
   /**
    * Sets the priority property
    */
@@ -171,7 +171,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the correlation id property
    */
-  const std::string& CorrelationId() const;
+  [[nodiscard]] const std::string& CorrelationId() const;
   /**
    * Sets the correlation id property
    */
@@ -179,7 +179,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Determines whether the correlation id property is set
    */
-  bool CorrelationIdIsSet() const;
+  [[nodiscard]] bool CorrelationIdIsSet() const;
   /**
    * Unsets the correlation id property
    */
@@ -188,7 +188,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the reply to property
    */
-  const std::string& ReplyTo() const;
+  [[nodiscard]] const std::string& ReplyTo() const;
   /**
    * Sets the reply to property
    */
@@ -196,7 +196,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Determines whether the reply to property is set
    */
-  bool ReplyToIsSet() const;
+  [[nodiscard]] bool ReplyToIsSet() const;
   /**
    * Unsets the reply to property
    */
@@ -205,7 +205,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the expiration property
    */
-  const std::string& Expiration() const;
+  [[nodiscard]] const std::string& Expiration() const;
   /**
    * Sets the expiration property
    */
@@ -213,7 +213,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Determines whether the expiration property is set
    */
-  bool ExpirationIsSet() const;
+  [[nodiscard]] bool ExpirationIsSet() const;
   /**
    * Unsets the expiration property
    */
@@ -222,7 +222,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
   /**
    * Gets the message id property
    */
-  const std::string& MessageId() const;
+  [[nodiscard]] const std::string& MessageId() const;
   /**
    * Sets the message id property
    */

@@ -53,7 +53,7 @@ namespace AmqpClient {
 class SIMPLEAMQPCLIENT_EXPORT Envelope : boost::noncopyable {
  public:
   /// a `shared_ptr` pointer to Envelope
-  typedef boost::shared_ptr<Envelope> ptr_t;
+  using ptr_t = std::shared_ptr<Envelope>;
 
   /**
    * Creates an new envelope object
@@ -74,7 +74,7 @@ class SIMPLEAMQPCLIENT_EXPORT Envelope : boost::noncopyable {
                       const std::string &exchange, bool redelivered,
                       const std::string &routing_key,
                       const boost::uint16_t delivery_channel) {
-    return boost::make_shared<Envelope>(message, consumer_tag, delivery_tag,
+    return std::make_shared<Envelope>(message, consumer_tag, delivery_tag,
                                         exchange, redelivered, routing_key,
                                         delivery_channel);
   }

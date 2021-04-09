@@ -62,7 +62,8 @@ namespace AmqpClient {
 class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
  public:
   /// a `shared_ptr` to Channel
-  typedef boost::shared_ptr<Channel> ptr_t;
+
+  using ptr_t = std::shared_ptr<Channel>;
 
   static const std::string
       EXCHANGE_TYPE_DIRECT;  ///< `"direct"` string constant

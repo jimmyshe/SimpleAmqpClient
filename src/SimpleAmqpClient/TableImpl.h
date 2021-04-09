@@ -31,7 +31,6 @@
 #include <amqp.h>
 
 #include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/variant/variant.hpp>
 #include <ctime>
 #include <string>
@@ -42,7 +41,9 @@
 namespace AmqpClient {
 namespace Detail {
 
-typedef boost::shared_ptr<amqp_pool_t> amqp_pool_ptr_t;
+//typedef boost::shared_ptr<amqp_pool_t> amqp_pool_ptr_t;
+
+using amqp_pool_ptr_t = std::shared_ptr<amqp_pool_t>;
 
 struct void_t {};
 

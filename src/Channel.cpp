@@ -142,8 +142,8 @@ Channel::OpenOpts Channel::OpenOpts::FromUri(const std::string &uri) {
   amqp_connection_info info;
   amqp_default_connection_info(&info);
 
-  boost::shared_ptr<char> uri_dup =
-      boost::shared_ptr<char>(strdup(uri.c_str()), free);
+  std::shared_ptr<char> uri_dup =
+      std::shared_ptr<char>(strdup(uri.c_str()), free);
 
   if (0 != amqp_parse_url(uri_dup.get(), &info)) {
     throw BadUriException();
@@ -201,14 +201,14 @@ Channel::ptr_t Channel::Open(const OpenOpts &opts) {
       case 0: {
         const OpenOpts::BasicAuth &auth =
             boost::get<OpenOpts::BasicAuth>(opts.auth);
-        return boost::make_shared<Channel>(
+        return std::make_shared<Channel>(
             OpenChannel(opts.host, opts.port, auth.username, auth.password,
                         opts.vhost, opts.frame_max, false));
       }
       case 1: {
         const OpenOpts::ExternalSaslAuth &auth =
             boost::get<OpenOpts::ExternalSaslAuth>(opts.auth);
-        return boost::make_shared<Channel>(
+        return std::make_shared<Channel>(
             OpenChannel(opts.host, opts.port, auth.identity, "", opts.vhost,
                         opts.frame_max, true));
       }
@@ -220,14 +220,14 @@ Channel::ptr_t Channel::Open(const OpenOpts &opts) {
     case 0: {
       const OpenOpts::BasicAuth &auth =
           boost::get<OpenOpts::BasicAuth>(opts.auth);
-      return boost::make_shared<Channel>(OpenSecureChannel(
+      return std::make_shared<Channel>(OpenSecureChannel(
           opts.host, opts.port, auth.username, auth.password, opts.vhost,
           opts.frame_max, opts.tls_params.get(), false));
     }
     case 1: {
       const OpenOpts::ExternalSaslAuth &auth =
           boost::get<OpenOpts::ExternalSaslAuth>(opts.auth);
-      return boost::make_shared<Channel>(
+      return std::make_shared<Channel>(
           OpenSecureChannel(opts.host, opts.port, auth.identity, "", opts.vhost,
                             opts.frame_max, opts.tls_params.get(), true));
     }
