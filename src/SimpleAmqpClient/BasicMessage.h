@@ -29,9 +29,6 @@
  */
 
 #include <boost/cstdint.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <string>
 
@@ -342,7 +339,7 @@ class SIMPLEAMQPCLIENT_EXPORT BasicMessage : boost::noncopyable {
  protected:
   struct Impl;
   /// PIMPL idiom
-  boost::scoped_ptr<Impl> m_impl;
+  std::unique_ptr<Impl> m_impl;
 };
 
 }  // namespace AmqpClient

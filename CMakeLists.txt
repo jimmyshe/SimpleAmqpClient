@@ -29,7 +29,8 @@ target_link_libraries(SimpleAmqpClient
         PUBLIC
         Boost::headers
         rabbitmq::rabbitmq
-        ${Boost_LIBRARIES})
+        #${Boost_LIBRARIES}
+        )
 
 if (WIN32)
     target_link_libraries(SimpleAmqpClient PUBLIC ws2_32)
