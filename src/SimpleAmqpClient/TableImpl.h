@@ -41,7 +41,7 @@
 namespace AmqpClient {
 namespace Detail {
 
-//typedef boost::shared_ptr<amqp_pool_t> amqp_pool_ptr_t;
+// typedef boost::shared_ptr<amqp_pool_t> amqp_pool_ptr_t;
 
 using amqp_pool_ptr_t = std::shared_ptr<amqp_pool_t>;
 

@@ -2,8 +2,8 @@
 #define SIMPLEAMQPCLIENT_BYTES_H
 
 #include <amqp.h>
-#include <boost/utility/string_ref.hpp>
 
+#include <boost/utility/string_ref.hpp>
 #include <string>
 
 namespace AmqpClient {

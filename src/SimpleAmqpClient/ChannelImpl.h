@@ -32,19 +32,15 @@
 #include <amqp.h>
 #include <amqp_framing.h>
 
-#include <boost/array.hpp>
-
 #include "SimpleAmqpClient/AmqpException.h"
 #include "SimpleAmqpClient/BasicMessage.h"
 #include "SimpleAmqpClient/Channel.h"
 #include "SimpleAmqpClient/ConsumerCancelledException.h"
 #include "SimpleAmqpClient/Envelope.h"
 #include "SimpleAmqpClient/MessageReturnedException.h"
-#define BOOST_BIND_GLOBAL_PLACEHOLDERS
-#include <boost/bind.hpp>
 #include <boost/chrono.hpp>
-#include <chrono>
 #include <boost/noncopyable.hpp>
+#include <chrono>
 #include <map>
 #include <vector>
 
@@ -74,10 +70,9 @@ class Channel::ChannelImpl : boost::noncopyable {
   void AddToFrameQueue(const amqp_frame_t &frame);
 
   template <class ChannelListType>
-  bool GetNextFrameFromBrokerOnChannel(const ChannelListType channels,
-                                       amqp_frame_t &frame_out,
-                                       std::chrono::microseconds timeout =
-                                           std::chrono::microseconds::max()) {
+  bool GetNextFrameFromBrokerOnChannel(
+      const ChannelListType channels, amqp_frame_t &frame_out,
+      std::chrono::microseconds timeout = std::chrono::microseconds::max()) {
     std::chrono::steady_clock::time_point end_point;
     std::chrono::microseconds timeout_left = timeout;
     if (timeout != std::chrono::microseconds::max()) {
@@ -111,9 +106,8 @@ class Channel::ChannelImpl : boost::noncopyable {
         if (now >= end_point) {
           return false;
         }
-        timeout_left =
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                end_point - now);
+        timeout_left = std::chrono::duration_cast<std::chrono::microseconds>(
+            end_point - now);
       }
     }
     return false;
@@ -153,16 +147,24 @@ class Channel::ChannelImpl : boost::noncopyable {
   }
 
   template <class ChannelListType, class ResponseListType>
-  bool GetMethodOnChannel(const ChannelListType channels, amqp_frame_t &frame,
-                          const ResponseListType &expected_responses,
-                          std::chrono::microseconds timeout =
-                              std::chrono::microseconds::max()) {
-    frame_queue_t::iterator desired_frame = std::find_if(
+  bool GetMethodOnChannel(
+      const ChannelListType channels, amqp_frame_t &frame,
+      const ResponseListType &expected_responses,
+      std::chrono::microseconds timeout = std::chrono::microseconds::max()) {
+    //    auto desired_frame = std::find_if(
+    //        m_frame_queue.begin(), m_frame_queue.end(),
+    //        boost::bind(
+    //            &ChannelImpl::is_expected_method_on_channel<ChannelListType,
+    //                                                        ResponseListType>,
+    //            _1, channels, expected_responses));
+
+    auto desired_frame = std::find_if(
         m_frame_queue.begin(), m_frame_queue.end(),
-        boost::bind(
-            &ChannelImpl::is_expected_method_on_channel<ChannelListType,
-                                                        ResponseListType>,
-            _1, channels, expected_responses));
+        [&channels, &expected_responses](const auto &arg) {
+          return ChannelImpl::is_expected_method_on_channel<ChannelListType,
+                                                            ResponseListType>(
+              arg, channels, expected_responses);
+        });
 
     if (m_frame_queue.end() != desired_frame) {
       frame = *desired_frame;
@@ -203,9 +205,8 @@ class Channel::ChannelImpl : boost::noncopyable {
         if (now >= end_point) {
           return false;
         }
-        timeout_left =
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                end_point - now);
+        timeout_left = std::chrono::duration_cast<std::chrono::microseconds>(
+            end_point - now);
       }
     }
     return false;
@@ -244,10 +245,12 @@ class Channel::ChannelImpl : boost::noncopyable {
   template <class ChannelListType>
   bool ConsumeMessageOnChannel(const ChannelListType channels,
                                Envelope::ptr_t &message, int timeout) {
-    envelope_list_t::iterator it = std::find_if(
-        m_delivered_messages.begin(), m_delivered_messages.end(),
-        boost::bind(ChannelImpl::envelope_on_channel<ChannelListType>, _1,
-                    channels));
+    envelope_list_t::iterator it =
+        std::find_if(m_delivered_messages.begin(), m_delivered_messages.end(),
+                     [&channels](const auto &arg) {
+                       return ChannelImpl::envelope_on_channel<ChannelListType>(
+                           arg, channels);
+                     });
 
     if (it != m_delivered_messages.end()) {
       message = *it;
@@ -331,7 +334,7 @@ class Channel::ChannelImpl : boost::noncopyable {
   std::vector<amqp_channel_t> GetAllConsumerChannels() const;
 
   void MaybeReleaseBuffersOnChannel(amqp_channel_t channel);
-  void CheckIsConnected();
+  void CheckIsConnected() const;
   void SetIsConnected(bool state) { m_is_connected = state; }
 
   // The RabbitMQ broker changed the way that basic.qos worked as of v3.3.0.

@@ -75,8 +75,8 @@ class SIMPLEAMQPCLIENT_EXPORT Envelope : boost::noncopyable {
                       const std::string &routing_key,
                       const boost::uint16_t delivery_channel) {
     return std::make_shared<Envelope>(message, consumer_tag, delivery_tag,
-                                        exchange, redelivered, routing_key,
-                                        delivery_channel);
+                                      exchange, redelivered, routing_key,
+                                      delivery_channel);
   }
 
   /**

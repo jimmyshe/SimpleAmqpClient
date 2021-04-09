@@ -34,10 +34,6 @@
 #include <amqp_ssl_socket.h>
 #endif
 
-#include <string.h>
-
-#include <boost/array.hpp>
-#include <boost/chrono.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/limits.hpp>
 #include <map>
@@ -45,6 +41,7 @@
 #include <queue>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -375,10 +372,10 @@ Channel::ChannelImpl *Channel::OpenChannel(const std::string &host, int port,
                                            const std::string &password,
                                            const std::string &vhost,
                                            int frame_max, bool sasl_external) {
-  ChannelImpl *impl = new ChannelImpl;
+  auto *impl = new ChannelImpl;
   impl->m_connection = amqp_new_connection();
 
-  if (NULL == impl->m_connection) {
+  if (nullptr == impl->m_connection) {
     throw std::bad_alloc();
   }
 
@@ -403,14 +400,14 @@ Channel::ChannelImpl *Channel::OpenSecureChannel(
     const std::string &host, int port, const std::string &username,
     const std::string &password, const std::string &vhost, int frame_max,
     const OpenOpts::TLSParams &tls_params, bool sasl_external) {
-  Channel::ChannelImpl *impl = new ChannelImpl;
+  auto *impl = new ChannelImpl;
   impl->m_connection = amqp_new_connection();
-  if (NULL == impl->m_connection) {
+  if (nullptr == impl->m_connection) {
     throw std::bad_alloc();
   }
 
   amqp_socket_t *socket = amqp_ssl_socket_new(impl->m_connection);
-  if (NULL == socket) {
+  if (nullptr == socket) {
     throw std::bad_alloc();
   }
 #if AMQP_VERSION >= 0x00080001
@@ -707,8 +704,7 @@ void Channel::BindQueue(const std::string &queue_name,
                         const std::string &exchange_name,
                         const std::string &routing_key,
                         const Table &arguments) {
-  const std::array<boost::uint32_t, 1> BIND_OK = {
-      {AMQP_QUEUE_BIND_OK_METHOD}};
+  const std::array<boost::uint32_t, 1> BIND_OK = {{AMQP_QUEUE_BIND_OK_METHOD}};
   m_impl->CheckIsConnected();
 
   amqp_queue_bind_t bind = {};
@@ -842,9 +838,9 @@ void Channel::BasicPublish(const std::string &exchange_name,
   // - channel.close - probably tried to publish to a non-existant exchange, in
   // any case error!
   // - connection.clsoe - something really bad happened
-  const std::array<boost::uint32_t, 3> PUBLISH_ACK = {
-      {AMQP_BASIC_ACK_METHOD, AMQP_BASIC_RETURN_METHOD,
-       AMQP_BASIC_NACK_METHOD}};
+  const std::array<boost::uint32_t, 3> PUBLISH_ACK = {{AMQP_BASIC_ACK_METHOD,
+                                                       AMQP_BASIC_RETURN_METHOD,
+                                                       AMQP_BASIC_NACK_METHOD}};
   amqp_frame_t response;
   std::array<amqp_channel_t, 1> channels = {{channel}};
   m_impl->GetMethodOnChannel(channels, response, PUBLISH_ACK);
@@ -865,8 +861,7 @@ void Channel::BasicPublish(const std::string &exchange_name,
                 response.payload.method.decoded)),
             channel);
 
-    const std::array<boost::uint32_t, 1> BASIC_ACK = {
-        {AMQP_BASIC_ACK_METHOD}};
+    const std::array<boost::uint32_t, 1> BASIC_ACK = {{AMQP_BASIC_ACK_METHOD}};
     m_impl->GetMethodOnChannel(channels, response, BASIC_ACK);
     m_impl->ReturnChannel(channel);
     m_impl->MaybeReleaseBuffersOnChannel(channel);

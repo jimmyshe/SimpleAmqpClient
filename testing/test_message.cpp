@@ -29,7 +29,6 @@
 #include <amqp.h>
 
 #include <algorithm>
-#include <boost/array.hpp>
 #include <iostream>
 
 #include "connected_test.h"

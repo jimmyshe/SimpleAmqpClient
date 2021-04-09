@@ -39,7 +39,8 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/array.hpp>
+#include <boost/lexical_cast.hpp>
+#include <string>
 
 #include "SimpleAmqpClient/AmqpException.h"
 #include "SimpleAmqpClient/AmqpLibraryException.h"
@@ -48,11 +49,6 @@
 #include "SimpleAmqpClient/ConnectionClosedException.h"
 #include "SimpleAmqpClient/ConsumerTagNotFoundException.h"
 #include "SimpleAmqpClient/TableImpl.h"
-#define BOOST_BIND_GLOBAL_PLACEHOLDERS
-#include <string.h>
-
-#include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
 
 #define BROKER_HEARTBEAT 0
 
@@ -202,8 +198,7 @@ amqp_channel_t Channel::ChannelImpl::GetChannel() {
     return m_last_used_channel;
   }
 
-  channel_state_list_t::iterator it =
-      std::find(m_channels.begin(), m_channels.end(), CS_Open);
+  auto it = std::find(m_channels.begin(), m_channels.end(), CS_Open);
 
   if (m_channels.end() == it) {
     amqp_channel_t new_channel = CreateNewChannel();
@@ -395,18 +390,22 @@ std::vector<amqp_channel_t> Channel::ChannelImpl::GetAllConsumerChannels()
 
 bool Channel::ChannelImpl::CheckForQueuedMessageOnChannel(
     amqp_channel_t channel) const {
-  frame_queue_t::const_iterator it =
-      std::find_if(m_frame_queue.begin(), m_frame_queue.end(),
-                   boost::bind(&Channel::ChannelImpl::is_method_on_channel, _1,
-                               AMQP_BASIC_DELIVER_METHOD, channel));
+  auto it = std::find_if(m_frame_queue.begin(), m_frame_queue.end(),
+                         [channel](auto PH1) {
+                           return Channel::ChannelImpl::is_method_on_channel(
+                               PH1, AMQP_BASIC_DELIVER_METHOD, channel);
+                         });
 
   if (it == m_frame_queue.end()) {
     return false;
   }
 
-  it = std::find_if(
-      it + 1, m_frame_queue.end(),
-      boost::bind(&Channel::ChannelImpl::is_on_channel, _1, channel));
+  //  it = std::find_if(
+  //      it + 1, m_frame_queue.end(),
+  //      boost::bind(&Channel::ChannelImpl::is_on_channel, _1, channel));
+  it = std::find_if(it + 1, m_frame_queue.end(), [channel](auto arg) {
+    return Channel::ChannelImpl::is_on_channel(arg, channel);
+  });
 
   if (it == m_frame_queue.end()) {
     return false;
@@ -419,9 +418,10 @@ bool Channel::ChannelImpl::CheckForQueuedMessageOnChannel(
   uint64_t body_received = 0;
 
   while (body_received < body_length) {
-    it = std::find_if(
-        it + 1, m_frame_queue.end(),
-        boost::bind(&Channel::ChannelImpl::is_on_channel, _1, channel));
+    it = std::find_if(it + 1, m_frame_queue.end(), [channel](auto &&PH1) {
+      return Channel::ChannelImpl::is_on_channel(
+          std::forward<decltype(PH1)>(PH1), channel);
+    });
 
     if (it == m_frame_queue.end()) {
       return false;
@@ -452,7 +452,7 @@ void Channel::ChannelImpl::AddToFrameQueue(const amqp_frame_t &frame) {
 
 bool Channel::ChannelImpl::GetNextFrameFromBroker(
     amqp_frame_t &frame, std::chrono::microseconds timeout) {
-  struct timeval *tvp = NULL;
+  struct timeval *tvp = nullptr;
   struct timeval tv_timeout;
   memset(&tv_timeout, 0, sizeof(tv_timeout));
 
@@ -461,10 +461,9 @@ bool Channel::ChannelImpl::GetNextFrameFromBroker(
     // long can be 32 or 64 bit depending on the platform/arch
     // unless the timeout is something absurd cast to long will be ok, but
     // lets guard against the case where someone does something silly
-    assert(
-        std::chrono::duration_cast<std::chrono::seconds>(timeout).count() <
-        static_cast<std::chrono::seconds::rep>(
-            std::numeric_limits<long>::max()));
+    assert(std::chrono::duration_cast<std::chrono::seconds>(timeout).count() <
+           static_cast<std::chrono::seconds::rep>(
+               std::numeric_limits<long>::max()));
 
     tv_timeout.tv_sec = static_cast<long>(
         std::chrono::duration_cast<std::chrono::seconds>(timeout).count());
@@ -486,9 +485,11 @@ bool Channel::ChannelImpl::GetNextFrameFromBroker(
 bool Channel::ChannelImpl::GetNextFrameOnChannel(
     amqp_channel_t channel, amqp_frame_t &frame,
     std::chrono::microseconds timeout) {
-  frame_queue_t::iterator it = std::find_if(
-      m_frame_queue.begin(), m_frame_queue.end(),
-      boost::bind(&Channel::ChannelImpl::is_on_channel, _1, channel));
+  auto it = std::find_if(m_frame_queue.begin(), m_frame_queue.end(),
+                         [channel](auto &&PH1) {
+                           return Channel::ChannelImpl::is_on_channel(
+                               std::forward<decltype(PH1)>(PH1), channel);
+                         });
 
   if (m_frame_queue.end() != it) {
     frame = *it;
@@ -510,14 +511,15 @@ bool Channel::ChannelImpl::GetNextFrameOnChannel(
 void Channel::ChannelImpl::MaybeReleaseBuffersOnChannel(
     amqp_channel_t channel) {
   if (m_frame_queue.end() ==
-      std::find_if(
-          m_frame_queue.begin(), m_frame_queue.end(),
-          boost::bind(&Channel::ChannelImpl::is_on_channel, _1, channel))) {
+      std::find_if(m_frame_queue.begin(), m_frame_queue.end(),
+                   [&channel](const auto &PH1) {
+                     return Channel::ChannelImpl::is_on_channel(PH1, channel);
+                   })) {
     amqp_maybe_release_buffers_on_channel(m_connection, channel);
   }
 }
 
-void Channel::ChannelImpl::CheckIsConnected() {
+void Channel::ChannelImpl::CheckIsConnected() const {
   if (!m_is_connected) {
     throw ConnectionClosedException();
   }
@@ -538,7 +540,7 @@ boost::uint32_t Channel::ChannelImpl::ComputeBrokerVersion(
     amqp_connection_state_t state) {
   const amqp_table_t *properties = amqp_get_server_properties(state);
   const amqp_bytes_t version = amqp_cstring_bytes("version");
-  amqp_table_entry_t *version_entry = NULL;
+  amqp_table_entry_t *version_entry = nullptr;
 
   for (int i = 0; i < properties->num_entries; ++i) {
     if (bytesEqual(properties->entries[i].key, version)) {
@@ -546,7 +548,7 @@ boost::uint32_t Channel::ChannelImpl::ComputeBrokerVersion(
       break;
     }
   }
-  if (NULL == version_entry) {
+  if (nullptr == version_entry) {
     return 0;
   }
 
@@ -558,11 +560,11 @@ boost::uint32_t Channel::ChannelImpl::ComputeBrokerVersion(
   if (version_components.size() != 3) {
     return 0;
   }
-  boost::uint32_t version_major =
+  auto version_major =
       boost::lexical_cast<boost::uint32_t>(version_components[0]);
-  boost::uint32_t version_minor =
+  auto version_minor =
       boost::lexical_cast<boost::uint32_t>(version_components[1]);
-  boost::uint32_t version_patch =
+  auto version_patch =
       boost::lexical_cast<boost::uint32_t>(version_components[2]);
   return (version_major & 0xFF) << 16 | (version_minor & 0xFF) << 8 |
          (version_patch & 0xFF);
