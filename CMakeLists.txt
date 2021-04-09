@@ -10,7 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_package(rabbitmq-c CONFIG REQUIRED)
 message(STATUS "using rabbitmq-c " ${rabbitmq-c_VERSION})
 
-find_package(Boost REQUIRED COMPONENTS chrono system)
+find_package(Boost REQUIRED COMPONENTS)
 message(STATUS "using boost " ${Boost_VERSION})
 
 add_library(SimpleAmqpClient SHARED
@@ -29,7 +29,6 @@ target_link_libraries(SimpleAmqpClient
         PUBLIC
         Boost::headers
         rabbitmq::rabbitmq
-        #${Boost_LIBRARIES}
         )
 
 if (WIN32)
