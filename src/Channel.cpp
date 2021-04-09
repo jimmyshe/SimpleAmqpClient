@@ -193,7 +193,7 @@ Channel::ptr_t Channel::Open(const OpenOpts &opts) {
   if (opts.auth.empty()) {
     throw std::runtime_error("opts.auth is not specified, it is required");
   }
-  if (!opts.tls_params.is_initialized()) {
+  if (!opts.tls_params.has_value()) {
     switch (opts.auth.which()) {
       case 0: {
         const OpenOpts::BasicAuth &auth =
@@ -219,14 +219,14 @@ Channel::ptr_t Channel::Open(const OpenOpts &opts) {
           boost::get<OpenOpts::BasicAuth>(opts.auth);
       return std::make_shared<Channel>(OpenSecureChannel(
           opts.host, opts.port, auth.username, auth.password, opts.vhost,
-          opts.frame_max, opts.tls_params.get(), false));
+          opts.frame_max, opts.tls_params.value(), false));
     }
     case 1: {
       const OpenOpts::ExternalSaslAuth &auth =
           boost::get<OpenOpts::ExternalSaslAuth>(opts.auth);
       return std::make_shared<Channel>(
           OpenSecureChannel(opts.host, opts.port, auth.identity, "", opts.vhost,
-                            opts.frame_max, opts.tls_params.get(), true));
+                            opts.frame_max, opts.tls_params.value(), true));
     }
     default:
       throw std::logic_error("Unhandled auth type");
@@ -337,7 +337,7 @@ Channel::ptr_t Channel::CreateSecureSaslExternal(
 
 Channel::ptr_t Channel::CreateFromUri(const std::string &uri, int frame_max) {
   OpenOpts opts = OpenOpts::FromUri(uri);
-  if (opts.tls_params.is_initialized()) {
+  if (opts.tls_params.has_value()) {
     throw std::runtime_error(
         "CreateFromUri only supports non-SSL-enabled URIs");
   }
@@ -351,7 +351,7 @@ Channel::ptr_t Channel::CreateSecureFromUri(
     const std::string &path_to_client_cert, bool verify_hostname_and_peer,
     int frame_max) {
   OpenOpts opts = OpenOpts::FromUri(uri);
-  if (!opts.tls_params.is_initialized()) {
+  if (!opts.tls_params.has_value()) {
     throw std::runtime_error(
         "CreateSecureFromUri only supports SSL-enabled URIs");
   }

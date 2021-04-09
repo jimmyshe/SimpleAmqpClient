@@ -29,12 +29,10 @@
  */
 
 #include <boost/cstdint.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <boost/variant.hpp>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -111,7 +109,7 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
     /// One of BasicAuth or ExternalSaslAuth is required.
     boost::variant<BasicAuth, ExternalSaslAuth> auth;
     /// Connect using TLS/SSL when set, otherwise use an unencrypted channel.
-    boost::optional<TLSParams> tls_params;
+    std::optional<TLSParams> tls_params;
 
     /**
      * Create an OpenOpts struct from a URI.
