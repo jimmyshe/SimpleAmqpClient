@@ -3,7 +3,9 @@
   "version-string": "2.5.1",
   "description": "",
   "dependencies": [
-    "boost",
+    "boost-variant",
+    "boost-utility",
+    "boost-units",
     "librabbitmq",
     "gtest"
   ]
