@@ -839,6 +839,8 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
    */
   Envelope::ptr_t BasicConsumeMessage(const std::string &consumer_tag);
 
+  std::optional<Envelope::ptr_t> BasicConsumeMessage(int timeoutMs);;
+
   /**
    * Consumes a single message from multiple consumers
    *

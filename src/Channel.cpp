@@ -1074,5 +1074,14 @@ bool Channel::BasicConsumeMessage(Envelope::ptr_t &message, int timeout) {
 
   return m_impl->ConsumeMessageOnChannel(channels, message, timeout);
 }
+std::optional<Envelope::ptr_t> Channel::BasicConsumeMessage(int timeoutMs) {
+  Envelope::ptr_t returnval;
+  auto isOk = BasicConsumeMessage(returnval, timeoutMs);
+  if (isOk) {
+    return {returnval};
+  } else {
+    return {};
+  }
+}
 
 }  // namespace AmqpClient
