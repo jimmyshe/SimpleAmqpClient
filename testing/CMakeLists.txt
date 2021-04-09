@@ -1,5 +1,5 @@
-include_directories(BEFORE SYSTEM ${gtest_SOURCE_DIR}/include)
-include_directories(../src)
+find_package(GTest CONFIG REQUIRED)
+#target_link_libraries(main PRIVATE GTest::gmock GTest::gtest GTest::gmock_main GTest::gtest_main)
 
 add_executable(test_api
     connected_test.h
@@ -15,5 +15,9 @@ add_executable(test_api
     test_ack.cpp
     test_nack.cpp
     )
-target_link_libraries(test_api SimpleAmqpClient gtest gtest_main)
-add_test(test_api test_api)
+target_link_libraries(test_api
+        PUBLIC
+        SimpleAmqpClient
+        GTest::gtest
+        GTest::gtest_main
+        )

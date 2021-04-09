@@ -1,0 +1,10 @@
+{
+  "name": "simple-amqp-client",
+  "version-string": "2.5.1",
+  "description": "",
+  "dependencies": [
+    "boost",
+    "librabbitmq",
+    "gtest"
+  ]
+}
